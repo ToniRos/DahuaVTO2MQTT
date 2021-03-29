@@ -116,7 +116,7 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
     def buffer_updated(self, nbytes):
         result = None
         
-        self.temp_buffer+=self.buffer[:nbytes]
+        System.arraycopy(self.buffer, 0, self.temp_buffer,self.size_buffer , nbytes)
         self.size_buffer+=nbytes
         _LOGGER.debug(f"Buffer Updated, received: {nbytes}, Message {self.buffer[:nbytes]}")
         _LOGGER.debug(f"Buffer Aded, received: {self.size_buffer}, Message {self.temp_buffer[:self.size_buffer]}")
@@ -137,7 +137,7 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
 
-
+        self.size_buffer=0
         self.data_received(self.temp_buffer[:self.size_buffer])
         
     def eof_received():

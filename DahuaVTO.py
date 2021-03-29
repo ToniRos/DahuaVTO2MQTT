@@ -15,7 +15,7 @@ from requests.auth import HTTPDigestAuth
 
 from Messages import MessageData
 
-DEBUG = os.environ.get('DEBUG', True)
+DEBUG = os.environ.get('DEBUG', False)
 
 log_level = logging.DEBUG if DEBUG else logging.INFO
 
@@ -169,11 +169,12 @@ class DahuaVTOClient(asyncio.Protocol):
         
         self.buffer[self.buffer_size:len(data)] = data   
         self.buffer_size+=len(data)
+        
+        _LOGGER.debug(f"Buffer Content, bytes: {self.buffer_size}, Message {self.buffer[:self.buffer_size]}")
 
         try:
-            message = self.parse_response(data)
+            message = self.parse_response(self.buffer[:self.buffer_size])
             _LOGGER.debug(f"Data received: {message}")
-            self.buffer_size=0
 
             message_id = message.get("id")
             params = message.get("params")
@@ -192,6 +193,8 @@ class DahuaVTOClient(asyncio.Protocol):
 
                 if method == "client.notifyEventStream":
                     self.handle_notify_event_stream(params)
+                    
+            self.buffer_size=0
 
         except Exception as ex:
             exc_type, exc_obj, exc_tb = sys.exc_info()

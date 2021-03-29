@@ -115,29 +115,29 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
 
     def buffer_updated(self, nbytes):
         _LOGGER.debug(f"Buffer Updated, received: {nbytes}, Message {self.buffer[:nbytes]}")
-        self.transport.write(self.buffer[:nbytes])
-#        result = None
+#        self.transport.write(self.buffer[:nbytes])
+        result = None
         
-#        self.temp_buffer[self.size_buffer:nbytes] = self.buffer[:nbytes]   
-#        self.size_buffer+=nbytes
+        self.temp_buffer[self.size_buffer:nbytes] = self.buffer[:nbytes]   
+        self.size_buffer+=nbytes
 #        _LOGGER.debug(f"Buffer Updated, received: {nbytes}, Message {self.buffer[:nbytes]}")
-#        _LOGGER.debug(f"Buffer Aded, received: {self.size_buffer}, Message {self.temp_buffer[:self.size_buffer]}")
+        _LOGGER.debug(f"Buffer Added, added: {self.size_buffer}, Message {self.temp_buffer[:self.size_buffer]}")
 
-#        try:
-#            response_parts = str(self.buffer[:nbytes]).split("\\n")
-#            for response_part in response_parts:
-#                if "{" in response_part:
-#                    start = response_part.index("{")
-#                    message = response_part[start:]
+        try:
+            response_parts = str(self.buffer[:nbytes]).split("\\n")
+            for response_part in response_parts:
+                if "{" in response_part:
+                    start = response_part.index("{")
+                    message = response_part[start:]
 
-#                    result = json.loads(message)
+                    result = json.loads(message)
 
-#        except Exception as e:
-#            exc_type, exc_obj, exc_tb = sys.exc_info()
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
         
-#        size_send=self.size_buffer
-#        self.size_buffer=0
-#        self.data_received(self.temp_buffer[:size_send])
+        size_send=self.size_buffer
+        self.size_buffer=0
+        self.data_received(self.temp_buffer[:size_send])
         
     def eof_received():
         _LOGGER.debug(f"Buffer EOF Received")

@@ -113,8 +113,9 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
 
     def buffer_updated(self, nbytes):
         _LOGGER.debug(f"Buffer Updated, received: {nbytes}, Message {self.buffer[:nbytes]}")
-        self.transport.write(self.buffer[:nbytes])
-        self.eof_received()
+#        self.transport.write(self.buffer[:nbytes])
+#        self.eof_received()
+        self.data_received(self.buffer[:nbytes])
         
     def eof_received():
         _LOGGER.debug(f"Buffer EOF Received")

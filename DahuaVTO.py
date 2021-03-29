@@ -15,7 +15,7 @@ from requests.auth import HTTPDigestAuth
 
 from Messages import MessageData
 
-DEBUG = os.environ.get('DEBUG', False)
+DEBUG = os.environ.get('DEBUG', True)
 
 log_level = logging.DEBUG if DEBUG else logging.INFO
 

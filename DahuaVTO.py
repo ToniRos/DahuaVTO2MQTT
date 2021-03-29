@@ -67,7 +67,7 @@ class DahuaVTOClient(asyncio.Protocol):
     messages: []
     mqtt_client: mqtt.Client
     dahua_details: {}
-	buffer = bytearray(256 * 1024)
+    buffer = bytearray(256 * 1024)
     buffer_size=0
 
     def __init__(self):
@@ -314,7 +314,7 @@ class DahuaVTOClient(asyncio.Protocol):
     @staticmethod
     def parse_response(response):
         result = None
-		_LOGGER.debug(f"Buffer Received, bytes: {len(response)}, Message {response}")
+        _LOGGER.debug(f"Buffer Received, bytes: {len(response)}, Message {response}")
         
         self.buffer[self.buffer_size:len(response)] = response   
         self.buffer_size+=nbytes
@@ -328,7 +328,7 @@ class DahuaVTOClient(asyncio.Protocol):
                     message = response_part[start:]
 
                     result = json.loads(message)
-					self.buffer_size=0
+                    self.buffer_size=0
 
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()

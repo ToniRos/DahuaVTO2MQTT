@@ -124,20 +124,20 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
         _LOGGER.debug(f"Buffer Added, added: {self.size_buffer}, Message {self.temp_buffer[:self.size_buffer]}")
 
         try:
-            response_parts = str(self.buffer[:nbytes]).split("\\n")
+            response_parts = str(self.temp_buffer[:size_send]).split("\\n")
             for response_part in response_parts:
                 if "{" in response_part:
                     start = response_part.index("{")
                     message = response_part[start:]
 
                     result = json.loads(message)
+                            
+                    size_send=self.size_buffer
+                    self.size_buffer=0
+                    self.data_received(self.temp_buffer[:size_send])
 
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
-        
-        size_send=self.size_buffer
-        self.size_buffer=0
-        self.data_received(self.temp_buffer[:size_send])
         
     def eof_received():
         _LOGGER.debug(f"Buffer EOF Received")

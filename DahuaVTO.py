@@ -119,7 +119,7 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
         self.temp_buffer+=self.buffer[:nbytes]
         self.size_buffer+=nbytes
         _LOGGER.debug(f"Buffer Updated, received: {nbytes}, Message {self.buffer[:nbytes]}")
-        _LOGGER.debug(f"Buffer Aded, received: {size_buffer}, Message {self.temp_buffer[:size_buffer]}")
+        _LOGGER.debug(f"Buffer Aded, received: {self.size_buffer}, Message {self.temp_buffer[:self.size_buffer]}")
         
 
 #        self.transport.write(self.buffer[:nbytes])
@@ -138,7 +138,7 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
             exc_type, exc_obj, exc_tb = sys.exc_info()
 
 
-        self.data_received(self.temp_buffer[:size_buffer])
+        self.data_received(self.temp_buffer[:self.size_buffer])
         
     def eof_received():
         _LOGGER.debug(f"Buffer EOF Received")

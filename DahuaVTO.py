@@ -15,7 +15,7 @@ from requests.auth import HTTPDigestAuth
 
 from Messages import MessageData
 
-DEBUG = os.environ.get('DEBUG', False)
+DEBUG = os.environ.get('DEBUG', True)
 
 log_level = logging.DEBUG if DEBUG else logging.INFO
 
@@ -56,7 +56,7 @@ def access_control_open_door():
         _LOGGER.error(f"Failed to open door, error: {ex}, Line: {exc_tb.tb_lineno}")
 
 
-class DahuaVTOClient(asyncio.BufferedProtocol):
+class DahuaVTOClient(asyncio.Protocol):
     requestId: int
     sessionId: int
     keep_alive_interval: int
@@ -67,9 +67,6 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
     messages: []
     mqtt_client: mqtt.Client
     dahua_details: {}
-    buffer = bytearray(256 * 1024)
-    temp_buffer = bytearray(256 * 1024)
-    size_buffer=0
 
     def __init__(self):
         self.dahua_details = {}
@@ -109,39 +106,6 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
         self.mqtt_client.connect(self.mqtt_broker_host, int(self.mqtt_broker_port), 60)
         self.mqtt_client.loop_start()
 
-    def get_buffer(self, sizehint):
-        _LOGGER.debug(f"Get_Buffer called: {sizehint}")
-        return self.buffer
-
-    def buffer_updated(self, nbytes):
-        _LOGGER.debug(f"Buffer Updated, received: {nbytes}, Message {self.buffer[:nbytes]}")
-#        self.transport.write(self.buffer[:nbytes])
-        result = None
-        
-        self.temp_buffer[self.size_buffer:nbytes] = self.buffer[:nbytes]   
-        self.size_buffer+=nbytes
-#        _LOGGER.debug(f"Buffer Updated, received: {nbytes}, Message {self.buffer[:nbytes]}")
-        _LOGGER.debug(f"Buffer Added, added: {self.size_buffer}, Message {self.temp_buffer[:self.size_buffer]}")
-
-        try:
-            response_parts = str(self.temp_buffer[:size_send]).split("\\n")
-            for response_part in response_parts:
-                if "{" in response_part:
-                    start = response_part.index("{")
-                    message = response_part[start:]
-
-                    result = json.loads(message)
-                            
-                    size_send=self.size_buffer
-                    self.size_buffer=0
-                    self.data_received(self.temp_buffer[:size_send])
-
-        except Exception as e:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-        
-    def eof_received():
-        _LOGGER.debug(f"Buffer EOF Received")
-        
     @staticmethod
     def on_mqtt_connect(client, userdata, flags, rc):
         _LOGGER.info(f"MQTT Broker connected with result code {rc}")

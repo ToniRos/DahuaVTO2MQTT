@@ -68,6 +68,8 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
     mqtt_client: mqtt.Client
     dahua_details: {}
     buffer = bytearray(256 * 1024)
+    temp_buffer = bytearray(256 * 1024)
+    size_buffer=0
 
     def __init__(self):
         self.dahua_details = {}
@@ -108,14 +110,35 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
         self.mqtt_client.loop_start()
 
     def get_buffer(self, sizehint):
-        _LOGGER.debug(f"Get_Buffer called")
+        _LOGGER.debug(f"Get_Buffer called: {sizehint}")
         return self.buffer
 
     def buffer_updated(self, nbytes):
+        result = None
+        
+        self.temp_buffer+=self.buffer[:nbytes]
+        self.size_buffer+=nbytes
         _LOGGER.debug(f"Buffer Updated, received: {nbytes}, Message {self.buffer[:nbytes]}")
+        _LOGGER.debug(f"Buffer Aded, received: {size_buffer}, Message {self.temp_buffer[:size_buffer]}")
+        
+
 #        self.transport.write(self.buffer[:nbytes])
 #        self.eof_received()
-        self.data_received(self.buffer[:nbytes])
+
+        try:
+            response_parts = str(self.buffer[:nbytes]).split("\\n")
+            for response_part in response_parts:
+                if "{" in response_part:
+                    start = response_part.index("{")
+                    message = response_part[start:]
+
+                    result = json.loads(message)
+
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+
+
+        self.data_received(self.temp_buffer[:size_buffer])
         
     def eof_received():
         _LOGGER.debug(f"Buffer EOF Received")

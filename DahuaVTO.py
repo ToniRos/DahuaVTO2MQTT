@@ -165,9 +165,15 @@ class DahuaVTOClient(asyncio.Protocol):
             _LOGGER.error(f"Failed to handle message, error: {ex}, Line: {exc_tb.tb_lineno}")
 
     def data_received(self, data):
+        _LOGGER.debug(f"Buffer Received, bytes: {len(data)}, Message {data}")
+        
+        self.buffer[self.buffer_size:len(data)] = data   
+        self.buffer_size+=len(data)
+
         try:
             message = self.parse_response(data)
             _LOGGER.debug(f"Data received: {message}")
+            self.buffer_size=0
 
             message_id = message.get("id")
             params = message.get("params")
@@ -314,21 +320,15 @@ class DahuaVTOClient(asyncio.Protocol):
     @staticmethod
     def parse_response(response):
         result = None
-        _LOGGER.debug(f"Buffer Received, bytes: {len(response)}, Message {response}")
-        
-        self.buffer[self.buffer_size:len(response)] = response   
-        self.buffer_size+=nbytes
-        _LOGGER.debug(f"Buffer Content, bytes: {self.buffer_size}, Message {self.buffer[:self.buffer_size]}")
 
         try:
-            response_parts = str(self.buffer[:self.buffer_size]).split("\\n")
+            response_parts = str(response).split("\\n")
             for response_part in response_parts:
                 if "{" in response_part:
                     start = response_part.index("{")
                     message = response_part[start:]
 
                     result = json.loads(message)
-                    self.buffer_size=0
 
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()

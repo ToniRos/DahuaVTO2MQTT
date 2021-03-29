@@ -116,14 +116,10 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
     def buffer_updated(self, nbytes):
         result = None
         
-        self.temp_buffer.append(self.buffer[:nbytes])
+        self.temp_buffer[self.size_buffer:nbytes] = self.buffer[:nbytes]   
         self.size_buffer+=nbytes
         _LOGGER.debug(f"Buffer Updated, received: {nbytes}, Message {self.buffer[:nbytes]}")
         _LOGGER.debug(f"Buffer Aded, received: {self.size_buffer}, Message {self.temp_buffer[:self.size_buffer]}")
-        
-
-#        self.transport.write(self.buffer[:nbytes])
-#        self.eof_received()
 
         try:
             response_parts = str(self.buffer[:nbytes]).split("\\n")
@@ -136,13 +132,13 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
 
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
-
+        
+        size_send=self.size_buffer
         self.size_buffer=0
-        self.data_received(self.temp_buffer[:self.size_buffer])
+        self.data_received(self.temp_buffer[:size_send])
         
     def eof_received():
         _LOGGER.debug(f"Buffer EOF Received")
-#        self.data_received(self.transport)
         
     @staticmethod
     def on_mqtt_connect(client, userdata, flags, rc):

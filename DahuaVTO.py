@@ -114,11 +114,11 @@ class DahuaVTOClient(asyncio.BufferedProtocol):
     def buffer_updated(self, nbytes):
         _LOGGER.debug(f"Buffer Updated, received: {nbytes}, Message {self.buffer[:nbytes]}")
         self.transport.write(self.buffer[:nbytes])
-        self.data_received(self.transport)
+        self.eof_received()
         
     def eof_received():
         _LOGGER.debug(f"Buffer EOF Received")
-        self.data_received(self.transport)
+#        self.data_received(self.transport)
         
     @staticmethod
     def on_mqtt_connect(client, userdata, flags, rc):

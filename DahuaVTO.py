@@ -172,6 +172,9 @@ class DahuaVTOClient(asyncio.Protocol):
         
         _LOGGER.debug(f"Buffer Content, bytes: {self.buffer_size}, Message {self.buffer[:self.buffer_size]}")
 
+        if self.buffer_size > 2200:
+            self.buffer_size = 0
+        
         try:
             message = self.parse_response(self.buffer[:self.buffer_size])
             _LOGGER.debug(f"Data received: {message}")
@@ -194,7 +197,7 @@ class DahuaVTOClient(asyncio.Protocol):
                 if method == "client.notifyEventStream":
                     self.handle_notify_event_stream(params)
                     
-            self.buffer_size=0
+            self.buffer_size = 0
 
         except Exception as ex:
             exc_type, exc_obj, exc_tb = sys.exc_info()

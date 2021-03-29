@@ -56,7 +56,7 @@ def access_control_open_door():
         _LOGGER.error(f"Failed to open door, error: {ex}, Line: {exc_tb.tb_lineno}")
 
 
-class DahuaVTOClient(asyncio.Protocol):
+class DahuaVTOClient(asyncio.BufferedProtocol):
     requestId: int
     sessionId: int
     keep_alive_interval: int
@@ -67,6 +67,7 @@ class DahuaVTOClient(asyncio.Protocol):
     messages: []
     mqtt_client: mqtt.Client
     dahua_details: {}
+    buffer = bytearray(256 * 1024)
 
     def __init__(self):
         self.dahua_details = {}
@@ -106,6 +107,12 @@ class DahuaVTOClient(asyncio.Protocol):
         self.mqtt_client.connect(self.mqtt_broker_host, int(self.mqtt_broker_port), 60)
         self.mqtt_client.loop_start()
 
+    def get_buffer(self, sizehint):
+        return self.buffer
+
+    def buffer_updated(self, nbytes):
+        self.transport.write(self.buffer[:nbytes])
+        
     @staticmethod
     def on_mqtt_connect(client, userdata, flags, rc):
         _LOGGER.info(f"MQTT Broker connected with result code {rc}")
